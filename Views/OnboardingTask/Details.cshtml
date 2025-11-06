@@ -1,0 +1,121 @@
+@model OnboardingTracker.Models.OnboardingTask
+
+@{
+    ViewData["Title"] = "Task Details";
+}
+
+<h1>Task Details</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h4>
+            @Model.Title
+            <span class="badge bg-@(Model.Status switch {
+                OnboardingTracker.Models.TaskStatus.NotStarted => "secondary",
+                OnboardingTracker.Models.TaskStatus.InProgress => "primary",
+                OnboardingTracker.Models.TaskStatus.Completed => "success",
+                _ => "secondary"
+            }) float-end">@Model.Status</span>
+        </h4>
+        <small class="text-muted">@Model.Category</small>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Employee</dt>
+            <dd class="col-sm-9">
+                <a asp-controller="Employee" asp-action="Details" asp-route-id="@Model.Employee.Id">
+                    @Model.Employee.FirstName @Model.Employee.LastName
+                </a>
+            </dd>
+            
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">@Model.Description</dd>
+            
+            <dt class="col-sm-3">Due Date</dt>
+            <dd class="col-sm-9">
+                @Model.DueDate.ToString("yyyy-MM-dd")
+                @if (Model.DueDate < DateTime.UtcNow && Model.Status != OnboardingTracker.Models.TaskStatus.Completed)
+                {
+                    <span class="badge bg-danger">Overdue</span>
+                }
+            </dd>
+            
+            <dt class="col-sm-3">Progress</dt>
+            <dd class="col-sm-9">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: @Model.ProgressPercentage%"
+                         aria-valuenow="@Model.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
+                        @Model.ProgressPercentage%
+                    </div>
+                </div>
+            </dd>
+            
+            <dt class="col-sm-3">Assigned To</dt>
+            <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.AssignedTo) ? "Unassigned" : Model.AssignedTo)</dd>
+            
+            @if (Model.CompletedAt.HasValue)
+            {
+                <dt class="col-sm-3">Completed At</dt>
+                <dd class="col-sm-9">@Model.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm")</dd>
+            }
+            
+            <dt class="col-sm-3">Created</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+            
+            <dt class="col-sm-3">Last Updated</dt>
+            <dd class="col-sm-9">@Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+        </dl>
+        
+        @if (Model.Status != OnboardingTracker.Models.TaskStatus.Completed)
+        {
+            <hr />
+            
+            <h5>Update Progress</h5>
+            <form asp-action="UpdateProgress" method="post" class="mb-3">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="number" name="progressPercentage" class="form-control" 
+                                   min="0" max="100" value="@Model.ProgressPercentage" />
+                            <span class="input-group-text">%</span>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+            <h5>Assign Task</h5>
+            <form asp-action="Assign" method="post" class="mb-3">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" name="assignedTo" class="form-control" 
+                                   value="@Model.AssignedTo" placeholder="Enter username or email" />
+                            <button type="submit" class="btn btn-primary">Assign</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        }
+        
+        <h5>Notes</h5>
+        <form asp-action="UpdateNotes" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <div class="form-group mb-3">
+                <textarea name="notes" class="form-control" rows="4">@Model.Notes</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Notes</button>
+        </form>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Index" asp-route-employeeId="@Model.EmployeeId" class="btn btn-secondary">Back to Tasks</a>
+        @if (Model.Status != OnboardingTracker.Models.TaskStatus.Completed)
+        {
+            <form asp-action="MarkComplete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success">Mark Complete</button>
+            </form>
+        }
+    </div>
+</div>

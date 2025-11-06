@@ -1,0 +1,134 @@
+@model IEnumerable<OnboardingTracker.Models.OnboardingTask>
+
+@{
+    ViewData["Title"] = "Onboarding Tasks";
+    var employeeId = ViewBag.EmployeeId as int?;
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+}
+
+<h1>Onboarding Tasks</h1>
+
+@if (employeeId.HasValue)
+{
+    var employee = Model.FirstOrDefault()?.Employee;
+    if (employee != null)
+    {
+        <div class="alert alert-info">
+            Tasks for: <strong>@employee.FirstName @employee.LastName</strong> (@employee.Department)
+            <a asp-controller="Employee" asp-action="Details" asp-route-id="@employeeId" class="btn btn-sm btn-outline-primary ms-3">View Employee</a>
+        </div>
+    }
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <form method="get" class="row g-3">
+            @if (employeeId.HasValue)
+            {
+                <input type="hidden" name="employeeId" value="@employeeId" />
+            }
+            
+            <div class="col-md-3">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat">@cat</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="0">Not Started</option>
+                    <option value="1">In Progress</option>
+                    <option value="2">Completed</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Assigned To</label>
+                <input type="text" name="assignedTo" class="form-control" placeholder="Username" />
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a asp-action="Index" asp-route-employeeId="@employeeId" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">No tasks found.</div>
+}
+else
+{
+    <div class="row">
+        @foreach (var task in Model)
+        {
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 @(task.Status == OnboardingTracker.Models.TaskStatus.Completed ? "border-success" : task.DueDate < DateTime.UtcNow ? "border-danger" : "")">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            @task.Title
+                            <span class="badge bg-@(task.Status switch {
+                                OnboardingTracker.Models.TaskStatus.NotStarted => "secondary",
+                                OnboardingTracker.Models.TaskStatus.InProgress => "primary",
+                                OnboardingTracker.Models.TaskStatus.Completed => "success",
+                                _ => "secondary"
+                            }) float-end">@task.Status</span>
+                        </h5>
+                        <small class="text-muted">@task.Category</small>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">@task.Description</p>
+                        
+                        <div class="mb-2">
+                            <strong>Due:</strong> @task.DueDate.ToString("yyyy-MM-dd")
+                            @if (task.DueDate < DateTime.UtcNow && task.Status != OnboardingTracker.Models.TaskStatus.Completed)
+                            {
+                                <span class="badge bg-danger">Overdue</span>
+                            }
+                        </div>
+                        
+                        @if (!string.IsNullOrEmpty(task.AssignedTo))
+                        {
+                            <div class="mb-2">
+                                <strong>Assigned to:</strong> @task.AssignedTo
+                            </div>
+                        }
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: @task.ProgressPercentage%"
+                                 aria-valuenow="@task.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
+                                @task.ProgressPercentage%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-sm btn-info">Details</a>
+                        
+                        @if (task.Status != OnboardingTracker.Models.TaskStatus.Completed)
+                        {
+                            <form asp-action="MarkComplete" asp-route-id="@task.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">Mark Complete</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (!employeeId.HasValue)
+{
+    <div class="mt-3">
+        <a asp-controller="Employee" asp-action="Index" class="btn btn-secondary">View All Employees</a>
+    </div>
+}
