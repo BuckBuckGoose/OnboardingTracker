@@ -1,0 +1,54 @@
+@model OnboardingTracker.Models.Employee
+
+@{
+    ViewData["Title"] = "Employee Details";
+}
+
+<h1>Employee Details</h1>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Model.FirstName @Model.LastName</h5>
+        
+        <dl class="row">
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+            
+            <dt class="col-sm-3">Department</dt>
+            <dd class="col-sm-9">@Model.Department</dd>
+            
+            <dt class="col-sm-3">Position</dt>
+            <dd class="col-sm-9">@Model.Position</dd>
+            
+            <dt class="col-sm-3">Start Date</dt>
+            <dd class="col-sm-9">@Model.StartDate.ToString("yyyy-MM-dd")</dd>
+            
+            <dt class="col-sm-3">Work Location</dt>
+            <dd class="col-sm-9">@(Model.IsRemote ? "Remote" : "On-site")</dd>
+            
+            <dt class="col-sm-3">Needs Equipment</dt>
+            <dd class="col-sm-9">@(Model.NeedsEquipment ? "Yes" : "No")</dd>
+            
+            <dt class="col-sm-3">Needs Access Badge</dt>
+            <dd class="col-sm-9">@(Model.NeedsAccessBadge ? "Yes" : "No")</dd>
+        </dl>
+        
+        <h6 class="mt-4">Onboarding Tasks (@Model.OnboardingTasks.Count)</h6>
+        <div class="progress mb-3">
+            @{
+                var completedTasks = Model.OnboardingTasks.Count(t => t.Status == OnboardingTracker.Models.TaskStatus.Completed);
+                var totalTasks = Model.OnboardingTasks.Count;
+                var progressPercentage = totalTasks > 0 ? (completedTasks * 100 / totalTasks) : 0;
+            }
+            <div class="progress-bar" role="progressbar" style="width: @progressPercentage%" 
+                 aria-valuenow="@progressPercentage" aria-valuemin="0" aria-valuemax="100">
+                @completedTasks / @totalTasks completed
+            </div>
+        </div>
+        
+        <div>
+            <a asp-controller="OnboardingTask" asp-action="Index" asp-route-employeeId="@Model.Id" class="btn btn-primary">View Tasks</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>

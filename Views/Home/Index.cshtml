@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Onboarding Tracker</h1>
+    <p class="lead">Streamline your employee onboarding process with automated task management</p>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Employee Onboarding</h5>
+                <p class="card-text">Create employee profiles and automatically generate relevant onboarding tasks based on department, location, and equipment needs.</p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Employee" asp-action="Create" class="btn btn-primary">Add Employee</a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Task Management</h5>
+                <p class="card-text">Track progress, update status, assign tasks to team members, and mark tasks as complete.</p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="OnboardingTask" asp-action="Index" class="btn btn-primary">View Tasks</a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Secure Access</h5>
+                <p class="card-text">Role-based access control ensures users only see tasks relevant to their department and responsibilities.</p>
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5">
+    <h3>Features</h3>
+    <ul>
+        <li>Automated task generation based on employee information</li>
+        <li>Department-specific task templates</li>
+        <li>Remote work and equipment tracking</li>
+        <li>Progress tracking and status updates</li>
+        <li>Task assignment and collaboration</li>
+        <li>Secure authentication with user management</li>
+    </ul>
+</div>
