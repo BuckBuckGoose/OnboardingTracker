@@ -1,0 +1,42 @@
+@model IEnumerable<OnboardingTracker.Models.Employee>
+
+@{
+    ViewData["Title"] = "Employees";
+}
+
+<h1>Employees</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add New Employee</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Position</th>
+            <th>Start Date</th>
+            <th>Remote</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.FirstName @item.LastName</td>
+                <td>@item.Email</td>
+                <td>@item.Department</td>
+                <td>@item.Position</td>
+                <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
+                <td>@(item.IsRemote ? "Yes" : "No")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                    <a asp-controller="OnboardingTask" asp-action="Index" asp-route-employeeId="@item.Id" class="btn btn-sm btn-success">Tasks</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
